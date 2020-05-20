@@ -8,10 +8,13 @@ from button import Button
 
 class Game:
 
-    def __init__(self, field, res):
+    def __init__(self, field, res, data):
         pygame.init()
         self.info = GameInfo(field, res)
-        self.players = [PlayerMan(Colors.red), PlayerBot(Colors.blue)]
+        bot_color = Colors.blue
+        if data["color_set"] == Colors.blue:
+            bot_color = Colors.red
+        self.players = [PlayerMan(data["color_set"]), PlayerBot(bot_color)]
         self.order = 0
 
         def over():
