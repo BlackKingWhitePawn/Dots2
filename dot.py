@@ -1,10 +1,10 @@
-from colors import Colors
+from images import Images
 
 
 class Dot:
 
     def __init__(self, ix=0, iy=0):
-        self.color = Colors.gray
+        self.image = Images.gray
         self.x = ix
         self.y = iy
         self.motioned = False
@@ -14,12 +14,12 @@ class Dot:
 
     def change_color(self, color=None):
         if color == 'Red':
-            self.color = Colors.red
+            self.image = Images.red
         else:
-            self.color = Colors.blue
+            self.image = Images.blue
 
         if color is not None:
-            self.color = color
+            self.image = color
 
     def is_active(self):
-        return self.color is Colors.gray
+        return self.image is Images.gray

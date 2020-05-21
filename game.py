@@ -1,48 +1,47 @@
 import pygame
+import threading
 from gameInfo import GameInfo
 from playerMan import PlayerMan
 from playerBot import PlayerBot
-from colors import Colors
+from images import Images
 from button import Button
+from colors import Colors
 
 
 class Game:
 
-    def __init__(self, field, res, data):
+    def __init__(self, res, data):
         pygame.init()
-        self.info = GameInfo(field, res)
-        bot_color = Colors.blue
-        if data["color_set"] == Colors.blue:
-            bot_color = Colors.red
-        self.players = [PlayerMan(data["color_set"]), PlayerBot(bot_color)]
+        self.info = GameInfo((data["n_x"], data['n_y']), res)
+        self.players = [PlayerMan(x) for x in data["men_images"]] + [PlayerBot(x) for x in data["ai_images"]]
         self.order = 0
+        self.data = {"new_game": False}
 
         def over():
             self.info.is_over = True
 
         def restart():
-            self.info.window.fill((192, 192, 192))
+            self.info.window.fill(Colors.gray)
             self.order = 0
             self.info.game_matrix = self.info.init_matrix(self.info.field)
 
-        colors = {
-            'Red': (255, 0, 0),
-            'Blue': (0, 0, 255),
-            'Green': (0, 255, 0)
-        }
+        def new_game():
+            self.data["new_game"] = True
+            over()
+
         self.buttons = {
-            'Simple': Button((10, 10), (30, 12), colors['Red'], lambda: print('it pressed!')),
-            'Simple2': Button((50, 10), (30, 12), colors['Blue'], lambda: print('hey buddy')),
-            'Restart': Button((200, 10), (50, 40), colors['Green'], restart)
+            'Restart': Button((40, 10), (20, 20), restart, Images.restart),
+            'New Game': Button((10, 10), (20, 20), new_game, Images.home),
+            'Record table': Button((70, 10), (20, 20), lambda: None, Images.record)
         }
 
     '''main loop'''
+
     def run(self):
         self.draw()
         while not self.info.is_over:
             if type(self.players[self.order]) is PlayerBot:
                 self.make_move()
-                pygame.draw.rect(self.info.window, (123, 213, 233), (400, 10, 10, 10))
             else:
                 self.handle_events()
 
@@ -52,6 +51,7 @@ class Game:
         pass
 
     def draw(self):
+        self.info.window.fill(Colors.gray)
         y1 = self.info.game_matrix[0][0].y
         y2 = self.info.game_matrix[0][-1].y
         x1 = self.info.game_matrix[0][0].x
@@ -65,10 +65,16 @@ class Game:
 
         for lay in self.info.game_matrix:
             for dot in lay:
-                self.info.window.blit(dot.color, (dot.x, dot.y))
+                self.info.window.blit(dot.image, (dot.x, dot.y))
 
         for b in [x[1] for x in self.buttons.items()]:
-            pygame.draw.rect(self.info.window, b.color, b.cords + b.size)
+            if b.image is not None:
+                self.info.window.blit(b.image, b.cords)
+
+        pygame.font.init()
+        font = pygame.font.SysFont('Arial', 16)
+        self.info.window.blit(font.render("It's     's turn", False, Colors.black), (500, 10))
+        self.info.window.blit(self.players[self.order].color, (523, 12))
 
         pygame.display.update()
 
@@ -96,11 +102,6 @@ class Game:
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 self.info.is_over = True
-            elif e.type == pygame.MOUSEMOTION:
-                index = self.click_action(e.pos)
-                if not index == (-1, -1) and \
-                        self.info.game_matrix[index[0]][index[1]].is_active():
-                    self.info.game_matrix[index[0]][index[1]].motioned = True
             elif e.type == pygame.MOUSEBUTTONDOWN:
                 index = self.click_action(e.pos)
                 if index == (-1, -1):

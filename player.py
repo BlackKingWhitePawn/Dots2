@@ -1,4 +1,4 @@
-from colors import Colors
+from images import Images
 
 
 class Player:
