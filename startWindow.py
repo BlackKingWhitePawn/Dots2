@@ -1,4 +1,5 @@
 import pygame
+from loadWindow import LoadWindow
 from button import Button
 from images import Images
 from colors import Colors
@@ -28,9 +29,19 @@ class StartWindow:
             "ai": 1,
             "close": False
         }
+        self.game_state = None
 
         def over():
             self.is_over = True
+
+        def load_game():
+            lw = LoadWindow()
+            lw.run()
+            self.window = pygame.display.set_mode((1000, 600))
+            if lw.loaded is not None:
+                self.game_state = lw.loaded
+                self.is_over = True
+            pygame.display.set_caption('Main menu')
 
         def ai_plus():
             if self.data['ai'] < 8 - self.data["men"]:
@@ -40,11 +51,11 @@ class StartWindow:
                 self.data['ai'] = 8 - self.data["men"]
 
         def ai_minus():
-            if self.data['ai'] > 0:
+            if self.data['ai'] > 1:
                 self.data['ai'] -= 1
                 self.available_images.add(self.ai_images.pop())
             else:
-                self.data['ai'] = 0
+                self.data['ai'] = 1
 
         def men_plus():
             if self.data['men'] < 8 - self.data["ai"]:
@@ -54,11 +65,11 @@ class StartWindow:
                 self.data['men'] = 8 - self.data["ai"]
 
         def men_minus():
-            if self.data['men'] > 0:
+            if self.data['men'] > 1:
                 self.data['men'] -= 1
                 self.available_images.add(self.men_images.pop())
             else:
-                self.data['men'] = 0
+                self.data['men'] = 1
 
         def x_plus():
             if self.data['n_x'] < 100:
@@ -101,11 +112,13 @@ class StartWindow:
             "Up4": Button((570, 440), (65, 65), x_plus, image=Images.up),
             "Down4": Button((570, 525), (65, 65), x_minus, image=Images.down),
 
-            "OK": Button((800, 225), (150, 150), on_click=over)
+            "Load": Button((800, 10), (150, 150), on_click=load_game, image=Images.load),
+            "OK": Button((800, 440), (150, 150), on_click=over, image=Images.ok)
         }
 
         self.window = pygame.display.set_mode(res)
         self.window.fill((192, 192, 192))
+        pygame.display.set_caption('Main menu')
         pygame.init()
 
     def run(self):
@@ -148,8 +161,8 @@ class StartWindow:
 
         pygame.font.init()
         font = pygame.font.SysFont('Arial', 100)
-        self.window.blit(font.render(self.data["ai"].__str__(), False, Colors.black), (255, 10))
-        self.window.blit(font.render(self.data["men"].__str__(), False, Colors.black), (645, 10))
-        self.window.blit(font.render(self.data["n_y"].__str__(), False, Colors.black), (255, 440))
-        self.window.blit(font.render(self.data["n_x"].__str__(), False, Colors.black), (645, 440))
+        self.window.blit(font.render(self.data["ai"].__str__(), True, Colors.black), (255, 10))
+        self.window.blit(font.render(self.data["men"].__str__(), True, Colors.black), (645, 10))
+        self.window.blit(font.render(self.data["n_y"].__str__(), True, Colors.black), (255, 440))
+        self.window.blit(font.render(self.data["n_x"].__str__(), True, Colors.black), (645, 440))
         pygame.display.update()

@@ -12,12 +12,17 @@
 
 ***
 
-Точка входа - __main__.py, инициализация игры (Game()) и запуск (Game.run())
-Основной цикл - game -> run()
+Точка входа - __main__.py, инициализация стартового окна StartWindow(), запуск, сохранение параметров запуска для Game
+                - размеры, игроки, или загрузка сохраненных ранее, инициализация игры (Game()) и запуск (Game.run())
+Основной цикл - startWindow, game -> run()
 Обработка событий - run() -> handle_events()
 Отрисовка run() - draw()
 Служебная информация о текущей игре - gameInfo
+Параметры запуска игры - startWindow.data
+Система сохранений - saveLoad
 Объекты кнопок - button
 Объекты игроков - player -> playerMan / playerBot / playerBotRandom
-Логика бота - playerBot -> make_move()
+Логика ботов - playerBot -> make_move()
 Юнит-тесты - testGame
+Изображения - Images
+Цвета (rgb) - Colors

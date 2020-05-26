@@ -1,5 +1,6 @@
 import pygame
 import threading
+from saveLoad import save
 from gameInfo import GameInfo
 from playerMan import PlayerMan
 from playerBot import PlayerBot
@@ -10,11 +11,15 @@ from colors import Colors
 
 class Game:
 
-    def __init__(self, res, data):
-        pygame.init()
-        self.info = GameInfo((data["n_x"], data['n_y']), res)
-        self.players = [PlayerMan(x) for x in data["men_images"]] + [PlayerBot(x) for x in data["ai_images"]]
-        self.order = 0
+    def __init__(self, res, data, game_state=None):
+        if game_state is not None:
+            self.players = game_state['players']
+            self.order = game_state['order']
+            self.info = GameInfo((data["n_x"], data['n_y']), res, game_state['matrix'])
+        else:
+            self.players = [PlayerMan(x) for x in data["men_images"]] + [PlayerBot(x) for x in data["ai_images"]]
+            self.order = 0
+            self.info = GameInfo((data["n_x"], data['n_y']), res)
         self.data = {"new_game": False}
 
         def over():
@@ -29,11 +34,20 @@ class Game:
             self.data["new_game"] = True
             over()
 
+        def save_game():
+            name = self.handle_events_enter_text()
+            save(self, 'saves/' + name + '.txt')
+            pygame.display.set_caption(name + ' was saved')
+
         self.buttons = {
-            'Restart': Button((40, 10), (20, 20), restart, Images.restart),
             'New Game': Button((10, 10), (20, 20), new_game, Images.home),
-            'Record table': Button((70, 10), (20, 20), lambda: None, Images.record)
+            'Restart': Button((40, 10), (20, 20), restart, Images.restart),
+            'Record table': Button((70, 10), (20, 20), lambda: None, Images.record),
+            'Save': Button((100, 10), (20, 20), save_game, Images.save)
         }
+
+        pygame.display.set_caption('Dots')
+        pygame.init()
 
     '''main loop'''
 
@@ -73,8 +87,8 @@ class Game:
 
         pygame.font.init()
         font = pygame.font.SysFont('Arial', 16)
-        self.info.window.blit(font.render("It's     's turn", False, Colors.black), (500, 10))
-        self.info.window.blit(self.players[self.order].color, (523, 12))
+        self.info.window.blit(font.render("It's     's turn", True, Colors.black), (490, 10))
+        self.info.window.blit(self.players[self.order].color, (513, 12))
 
         pygame.display.update()
 
@@ -119,3 +133,31 @@ class Game:
         if self.info.game_matrix[index[0]][index[1]].is_active():
             self.players[self.order].dot_coords = index
             self.make_move()
+
+    def handle_events_enter_text(self):
+        is_over = False
+        text = []
+        while not is_over:
+            for e in pygame.event.get():
+                if e.type == pygame.QUIT:
+                    self.info.is_over = True
+                    return
+                elif e.type == pygame.MOUSEBUTTONDOWN:
+                    if self.buttons['Save'].is_pressed(e.pos):
+                        is_over = True
+                elif e.type == pygame.KEYDOWN:
+                    if e.type == pygame.K_ESCAPE:
+                        pygame.display.set_caption('Dots')
+                        is_over = True
+                        return
+                    elif e.key == pygame.K_RETURN:
+                        is_over = True
+                    elif e.key == pygame.K_BACKSPACE:
+                        if len(text) > 0:
+                            text.pop()
+                    elif not e.key == pygame.K_MINUS:
+                        text += e.unicode
+
+            pygame.display.set_caption('Save as ' + ''.join(text))
+
+        return ''.join(text)

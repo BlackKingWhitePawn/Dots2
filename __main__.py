@@ -8,6 +8,6 @@ if __name__ == '__main__':
         sw.run()
         if sw.data["close"]:
             break
-        g = Game((1600, 900), sw.data)
+        g = Game((1600, 900), sw.data, sw.game_state)
         g.run()
         check = g.data["new_game"]

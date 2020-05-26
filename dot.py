@@ -3,8 +3,8 @@ from images import Images
 
 class Dot:
 
-    def __init__(self, ix=0, iy=0):
-        self.image = Images.gray
+    def __init__(self, ix=0, iy=0, image=Images.gray):
+        self.image = image
         self.x = ix
         self.y = iy
         self.motioned = False

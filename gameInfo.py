@@ -4,7 +4,7 @@ from dot import Dot
 
 class GameInfo(object):
 
-    def __init__(self, field, res):
+    def __init__(self, field, res, game_matrix=None):
         self.space = 20
         self.dot_size = 12
         self.res = res
@@ -12,7 +12,10 @@ class GameInfo(object):
         self.window.fill((192, 192, 192))
         self.is_over = False
         self.field_pos = ((res[0] - self.space * (field[0] - 1)) / 2, (res[1] - self.space * (field[1] - 1)) / 2)
-        self.game_matrix = self.init_matrix(field)
+        if game_matrix is not None:
+            self.game_matrix = game_matrix
+        else:
+            self.game_matrix = self.init_matrix(field)
         self.field = field
 
     def init_matrix(self, field):
