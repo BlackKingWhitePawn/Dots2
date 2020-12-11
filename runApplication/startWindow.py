@@ -1,38 +1,39 @@
 import pygame
 from loadWindow import LoadWindow
-from button import Button
+from controls.button import Button
 from images import Images
-from colors import Colors
+from dots.colors import Colors
 
 
 class StartWindow:
 
     def __init__(self, res):
         self.available_images = {
-            Images.green,
-            Images.orange,
-            Images.yellow,
-            Images.pink,
-            Images.purple,
-            Images.marine
+            'green': Images.green,
+            'orange': Images.orange,
+            'yellow': Images.yellow,
+            'pink': Images.pink,
+            'purple': Images.purple,
+            'marine': Images.marine
         }
-        self.men_images = [Images.red]
-        self.ai_images = [Images.blue]
+        self.men_images = {'red': Images.red, 'blue': Images.blue}
+        self.ai_images = {}
         self.is_over = False
         self.data = {
             "men_images": self.men_images,
             "ai_images": self.ai_images,
             "resolution_set": (1080, 720),
             "n_x": 32,
-            "n_y": 39,
-            "men": 1,
-            "ai": 1,
+            "n_y": 37,
+            "men": 2,
+            "ai": 0,
             "close": False
         }
         self.game_state = None
 
         def over():
-            self.is_over = True
+            if self.data['men'] + self.data['ai'] > 1:
+                self.is_over = True
 
         def load_game():
             lw = LoadWindow()
@@ -46,30 +47,34 @@ class StartWindow:
         def ai_plus():
             if self.data['ai'] < 8 - self.data["men"]:
                 self.data['ai'] += 1
-                self.ai_images.append(self.available_images.pop())
+                color = self.available_images.popitem()
+                self.ai_images[color[0]] = color[1]
             else:
                 self.data['ai'] = 8 - self.data["men"]
 
         def ai_minus():
-            if self.data['ai'] > 1:
+            if self.data['ai'] > 0:
                 self.data['ai'] -= 1
-                self.available_images.add(self.ai_images.pop())
+                color = self.ai_images.popitem()
+                self.available_images[color[0]] = color[1]
             else:
-                self.data['ai'] = 1
+                self.data['ai'] = 0
 
         def men_plus():
             if self.data['men'] < 8 - self.data["ai"]:
                 self.data['men'] += 1
-                self.men_images.append(self.available_images.pop())
+                color = self.available_images.popitem()
+                self.men_images[color[0]] = color[1]
             else:
                 self.data['men'] = 8 - self.data["ai"]
 
         def men_minus():
-            if self.data['men'] > 1:
+            if self.data['men'] > 0:
                 self.data['men'] -= 1
-                self.available_images.add(self.men_images.pop())
+                color = self.men_images.popitem()
+                self.available_images[color[0]] = color[1]
             else:
-                self.data['men'] = 1
+                self.data['men'] = 0
 
         def x_plus():
             if self.data['n_x'] < 100:
@@ -145,14 +150,14 @@ class StartWindow:
         self.window.fill(Colors.gray)
         x = 10
         y = 170
-        for n in self.ai_images:
-            self.window.blit(n, (x, y))
+        for key in self.ai_images:
+            self.window.blit(self.ai_images[key][0], (x, y))
             x += 20
 
         x = 400
         y = 170
-        for n in self.men_images:
-            self.window.blit(n, (x, y))
+        for key in self.men_images:
+            self.window.blit(self.men_images[key][0], (x, y))
             x += 20
 
         for b in [x[1] for x in self.buttons.items()]:

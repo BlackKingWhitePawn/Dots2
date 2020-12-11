@@ -1,5 +1,4 @@
-from player import Player
-from dot import Dot
+from player.player import Player
 
 
 class PlayerMan(Player):

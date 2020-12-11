@@ -1,20 +1,20 @@
 import json
 import os
 from images import Images
-from dot import Dot
-from playerMan import PlayerMan
-from playerBot import PlayerBot
+from dots.dot import Dot
+from player.playerMan import PlayerMan
+from player.playerBot import PlayerBot
 
 img_dict = {
-    Images.red: 'r',
-    Images.blue: 'b',
-    Images.green: 'g',
-    Images.gray: '0',
-    Images.yellow: 'y',
-    Images.marine: 'm',
-    Images.pink: 'p',
-    Images.purple: 'u',
-    Images.orange: 'o'
+    Images.red: 'red',
+    Images.blue: 'blue',
+    Images.green: 'green',
+    Images.gray: 'gray',
+    Images.yellow: 'yellow',
+    Images.marine: 'marine',
+    Images.pink: 'pink',
+    Images.purple: 'purple',
+    Images.orange: 'orange'
 }
 
 
@@ -22,11 +22,11 @@ def save(game, name):
     game_state = {
         'matrix': format_matrix(game.info.game_matrix),
         'order': game.order,
-        'players': format_players(game.players)
+        'players': format_players_to_data(game.players)
     }
 
     for file_name in os.listdir('saves'):
-        if file_name == name:
+        if file_name[:-4] == name[6:-4]:
             return 'The ' + name + ' is already exist'
 
     with open(name, 'w') as f:
@@ -51,18 +51,18 @@ def enformat_matrix(format_game_matrix):
         gm.append(list())
         for y in range(len(format_game_matrix[0])):
             elem = format_game_matrix[x][y]
-            gm[x].append(Dot(elem[0], elem[1], img_dict2[elem[2]]))
+            gm[x].append(Dot(ix=elem[0], iy=elem[1], image=img_dict2[elem[2]], color=img_dict[img_dict2[elem[2]]]))
 
     return gm
 
 
-def format_players(players):
-    return [(img_dict[x.color], x.is_man) for x in players]
+def format_players_to_data(players):
+    return [(img_dict[x.color[1]], x.is_man) for x in players]
 
 
-def enformat_players(format_players2):
+def format_data_to_players(format_players):
     img_dict2 = {v: k for k, v in img_dict.items()}
-    return [(PlayerBot(img_dict2[x[0]]), PlayerMan(img_dict2[x[0]]))[x[1]] for x in format_players2]
+    return [(PlayerBot((x[0], img_dict2[x[0]])), PlayerMan((x[0], img_dict2[x[0]])))[x[1]] for x in format_players]
 
 
 def load(name):
@@ -72,6 +72,6 @@ def load(name):
             with open(name) as f:
                 game_state = json.load(f)
                 game_state['matrix'] = enformat_matrix(game_state['matrix'])
-                game_state['players'] = enformat_players(game_state['players'])
+                game_state['players'] = format_data_to_players(game_state['players'])
                 os.chdir('..')
                 return game_state

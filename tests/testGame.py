@@ -1,4 +1,4 @@
-from game import Game as t
+from game.game import Game as t
 import unittest
 
 

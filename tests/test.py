@@ -1,5 +1,3 @@
-from game import Game as t
-from dot import Dot
 from images import Images
 
 # GAME = t((3, 3))
@@ -58,5 +56,16 @@ img_dict = {
     Images.purple: 'u',
 }
 
+# s = {(1, 2), (3, 4), (33, 5)}
+# s.add((1, 2))
+# if (1, 4) in s:
+#     s.remove((1, 4))
+# print(s)
 
-print({v: k for k, v in img_dict.items()})
+# pla = [0, 1, 2, 3]
+# o = 3
+# print((o + 1) % len(pla))
+
+a = {2: 'fsd', 3: 'sdg'}
+for x in a.items():
+    print(x)
