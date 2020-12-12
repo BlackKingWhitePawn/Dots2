@@ -1,4 +1,5 @@
 from images import Images
+import pygame
 
 # GAME = t((3, 3))
 # GAME.game_matrix = [
@@ -44,7 +45,7 @@ from images import Images
 #     chain.clear()
 
 
-#print(get_chain(GAME, (1, 0)))
+# print(get_chain(GAME, (1, 0)))
 img_dict = {
     Images.red: 'r',
     Images.blue: 'b',
@@ -56,6 +57,7 @@ img_dict = {
     Images.purple: 'u',
 }
 
+
 # s = {(1, 2), (3, 4), (33, 5)}
 # s.add((1, 2))
 # if (1, 4) in s:
@@ -66,6 +68,12 @@ img_dict = {
 # o = 3
 # print((o + 1) % len(pla))
 
-a = {2: 'fsd', 3: 'sdg'}
-for x in a.items():
-    print(x)
+class A:
+    def __init__(self):
+        self.b = 2
+
+
+class B(A):
+    pass
+
+print(pygame.font.get_fonts())

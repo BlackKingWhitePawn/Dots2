@@ -1,5 +1,5 @@
 import pygame
-from dot import Dot
+from dots.dot import Dot
 
 
 class GameInfo(object):
@@ -21,7 +21,7 @@ class GameInfo(object):
     def init_matrix(self, field):
         gm = list()
         for x in range(field[0]):
-            gm.append(list())
+            gm.append(list())  # game matrix was appended with column
             for y in range(field[1]):
                 gm[x].append(Dot(x * self.space + self.field_pos[0], y * self.space + self.field_pos[1]))
 

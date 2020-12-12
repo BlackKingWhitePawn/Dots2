@@ -1,14 +1,19 @@
 from player.player import Player
+from random import randint
 
 
 class PlayerBot(Player):
 
-    def __init__(self, color):
+    def __init__(self, color, name="default", ai_level=0):
         self.color = color
+        self.name = name
+        self.points = 0
         self.is_man = False
+        self.level = ai_level
 
     def make_move(self, game_matrix):
-        return (2, 2)
+        if self.level == 0:
+            return randint(0, len(game_matrix) - 1), randint(0, len(game_matrix[0]) - 1)
 
     def get_chain(self, dot_coords):
         chain = []

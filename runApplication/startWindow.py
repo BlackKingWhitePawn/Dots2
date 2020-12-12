@@ -16,17 +16,17 @@ class StartWindow:
             'purple': Images.purple,
             'marine': Images.marine
         }
-        self.men_images = {'red': Images.red, 'blue': Images.blue}
-        self.ai_images = {}
+        self.men_images = {}
+        self.ai_images = {'red': Images.red, 'blue': Images.blue}
         self.is_over = False
         self.data = {
             "men_images": self.men_images,
             "ai_images": self.ai_images,
             "resolution_set": (1080, 720),
             "n_x": 32,
-            "n_y": 37,
-            "men": 2,
-            "ai": 0,
+            "n_y": 32,
+            "men": 0,
+            "ai": 2,
             "close": False
         }
         self.game_state = None
