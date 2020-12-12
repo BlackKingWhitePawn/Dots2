@@ -16,8 +16,8 @@ class StartWindow:
             'purple': Images.purple,
             'marine': Images.marine
         }
-        self.men_images = {}
-        self.ai_images = {'red': Images.red, 'blue': Images.blue}
+        self.men_images = {'red': Images.red, 'blue': Images.blue}
+        self.ai_images = {}
         self.is_over = False
         self.data = {
             "men_images": self.men_images,
@@ -25,8 +25,8 @@ class StartWindow:
             "resolution_set": (1080, 720),
             "n_x": 32,
             "n_y": 32,
-            "men": 0,
-            "ai": 2,
+            "men": 2,
+            "ai": 0,
             "close": False
         }
         self.game_state = None
@@ -127,6 +127,12 @@ class StartWindow:
         pygame.init()
 
     def run(self):
+        if self.is_over:
+            self.window = pygame.display.set_mode((1000, 600))
+            self.window.fill((192, 192, 192))
+            pygame.display.set_caption('Main menu')
+            pygame.init()
+            self.is_over = False
         self.draw()
         while not self.is_over:
             self.draw()

@@ -1,4 +1,5 @@
 import pygame
+import time
 
 from game.referee import Referee
 from saveLoad import save
@@ -12,26 +13,34 @@ from dots.colors import Colors
 
 class Game:
 
-    def __init__(self, res, data, game_state=None):
+    def __init__(self, res, data, game_state=None, player_men=None, player_bot=None):
         if game_state is not None:
             self.players = game_state['players']
             self.order = game_state['order']
             self.info = GameInfo((data["n_x"], data['n_y']), res, game_state['matrix'])
+            if 'time' in game_state:
+                self.time = game_state['time']
+            else:
+                self.time = time.time()
         else:
-            self.players = [PlayerMan(x) for x in data["men_images"].items()] + [PlayerBot(x) for x in data["ai_images"].items()]
+            self.players = player_men + player_bot
             self.order = 0
             self.info = GameInfo((data["n_x"], data['n_y']), res)
+            self.time = time.time()
+
         self.data = {"new_game": False}
 
         def over():
             self.info.is_over = True
 
         def restart():
+            self.time = time.time()
             self.info.window.fill(Colors.gray)
             self.order = 0
             self.info.game_matrix = self.info.init_matrix(self.info.field)
 
         def new_game():
+            self.time = time.time()
             self.data["new_game"] = True
             over()
 
@@ -69,6 +78,7 @@ class Game:
     '''main loop'''
 
     def run(self):
+        self.time = time.time()
         self.draw()
         while not self.info.is_over:
             if type(self.players[self.order]) is PlayerBot:
@@ -120,6 +130,7 @@ class Game:
             window.blit(font.render('{0}: {1}'.format(player.name, player.points), True, self.colors[player.color[0]]), (x, y))
             y += 40
 
+        window.blit(font.render((time.time() - self.time).__str__()[:4], True, Colors.black), (self.info.res[0] - 200, 400))
         pygame.display.update()
 
     def click_action(self, m_pos):

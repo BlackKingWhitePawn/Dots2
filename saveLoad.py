@@ -22,7 +22,8 @@ def save(game, name):
     game_state = {
         'matrix': format_matrix(game.info.game_matrix),
         'order': game.order,
-        'players': format_players_to_data(game.players)
+        'players': format_players_to_data(game.players),
+        'time': game.time
     }
 
     for file_name in os.listdir('saves'):
