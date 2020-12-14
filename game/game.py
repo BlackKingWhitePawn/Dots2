@@ -4,7 +4,6 @@ import time
 from game.referee import Referee
 from saveLoad import save
 from game.gameInfo import GameInfo
-from player.playerMan import PlayerMan
 from player.playerBot import PlayerBot
 from images import Images
 from controls.button import Button

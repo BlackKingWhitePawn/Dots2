@@ -76,4 +76,6 @@ class A:
 class B(A):
     pass
 
-print(pygame.font.get_fonts())
+# print(pygame.font.get_fonts())
+dict = {}
+print(dict == {})

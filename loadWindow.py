@@ -12,6 +12,8 @@ class LoadWindow:
 
     def __init__(self):
         self.is_over = False
+        self.play = False
+        self.back = False
         self.loaded = None
 
         def create_delete_func(name_to_delete):
@@ -47,12 +49,28 @@ class LoadWindow:
             y1 = y
             s1 = s
             self.buttons.update({
-                s1: Button((10, y1), (200, 65), create_load_func(s1), Images.empty),
+                s1: Button((10, y1), (200, 65), create_load_func(s1), caption=s1),
                 s1 + '-d': Button((220, y1), (65, 65), create_delete_func(s1), Images.cross)
             })
             y += 80
 
-        self.window = pygame.display.set_mode((300, 600))
+        def over():
+            self.is_over = True
+
+        def back():
+            self.back = True
+            over()
+
+        def play():
+            self.play = True
+            over()
+
+        height = max(600, (len(self.buttons) + 1) * 44)
+        self.buttons.update({
+            'back': Button((10, height - 90), (200, 65), on_click=back, caption='back to menu'),
+            "OK": Button((220, height - 90), (150, 150), on_click=play, image=Images.play)
+        })
+        self.window = pygame.display.set_mode((300, height))
         self.window.fill(Colors.gray)
         pygame.display.set_caption('Load game')
         pygame.init()
@@ -72,9 +90,9 @@ class LoadWindow:
         for k, v in self.buttons.items():
             if not k[-2:] == '-d':
                 pygame.font.init()
-                size = min(max(10, 40 - 4 * (len(k[:-4]) - 10)), 40)
+                size = min(max(10, 40 - 4 * (len(v.caption) - 10)), 40)
                 font = pygame.font.SysFont('Arial', size)
-                self.window.blit(font.render(k[:-4], True, Colors.gray), (v.cords[0] + 15, v.cords[1] + 10))
+                self.window.blit(font.render(v.caption, True, Colors.gray), (v.cords[0] + 15, v.cords[1] + 10))
 
         pygame.display.update()
 

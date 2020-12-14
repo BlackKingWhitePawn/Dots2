@@ -1,6 +1,9 @@
 import pygame
 from loadWindow import LoadWindow
+from runApplication.playerWindow import PlayerWindow
 from controls.button import Button
+from player.playerMan import PlayerMan
+from player.playerBot import PlayerBot
 from images import Images
 from dots.colors import Colors
 
@@ -18,6 +21,8 @@ class StartWindow:
         }
         self.men_images = {'red': Images.red, 'blue': Images.blue}
         self.ai_images = {}
+        self.men_players = {}
+        self.ai_players = {}
         self.is_over = False
         self.data = {
             "men_images": self.men_images,
@@ -35,13 +40,24 @@ class StartWindow:
             if self.data['men'] + self.data['ai'] > 1:
                 self.is_over = True
 
+        def set_names():
+            pw = PlayerWindow(self.men_images, self.ai_images)
+            pw.run()
+            self.window = pygame.display.set_mode((1000, 600))
+            if not pw.back:
+                self.men_players = pw.player_men
+                self.ai_players = pw.player_bot
+                over()
+
         def load_game():
             lw = LoadWindow()
             lw.run()
             self.window = pygame.display.set_mode((1000, 600))
+            if lw.play:
+                set_names()
             if lw.loaded is not None:
                 self.game_state = lw.loaded
-                self.is_over = True
+                over()
             pygame.display.set_caption('Main menu')
 
         def ai_plus():
@@ -118,7 +134,7 @@ class StartWindow:
             "Down4": Button((570, 525), (65, 65), x_minus, image=Images.down),
 
             "Load": Button((800, 10), (150, 150), on_click=load_game, image=Images.load),
-            "OK": Button((800, 440), (150, 150), on_click=over, image=Images.ok)
+            "OK": Button((800, 440), (150, 150), on_click=set_names, image=Images.ok)
         }
 
         self.window = pygame.display.set_mode(res)
@@ -127,12 +143,6 @@ class StartWindow:
         pygame.init()
 
     def run(self):
-        if self.is_over:
-            self.window = pygame.display.set_mode((1000, 600))
-            self.window.fill((192, 192, 192))
-            pygame.display.set_caption('Main menu')
-            pygame.init()
-            self.is_over = False
         self.draw()
         while not self.is_over:
             self.draw()
