@@ -1,13 +1,18 @@
+import json
+import os
+
 import pygame
 import time
 
-from game.referee import Referee
+from gameTools.referee import Referee
+from player.playerMan import PlayerMan
 from saveLoad import save
-from game.gameInfo import GameInfo
+from gameTools.gameInfo import GameInfo
 from player.playerBot import PlayerBot
 from images import Images
 from controls.button import Button
 from dots.colors import Colors
+from recordsWindow import RecordWindow
 
 
 class Game:
@@ -17,29 +22,43 @@ class Game:
             self.players = game_state['players']
             self.order = game_state['order']
             self.info = GameInfo((data["n_x"], data['n_y']), res, game_state['matrix'])
-            if 'time' in game_state:
-                self.time = game_state['time']
+            if 'timers' in game_state:
+                self.timers = game_state['timers']
+                self.time = True
             else:
-                self.time = time.time()
+                self.time = False
         else:
             self.players = player_men + player_bot
             self.order = 0
             self.info = GameInfo((data["n_x"], data['n_y']), res)
-            self.time = time.time()
+            self.time = False
+            if data['time']:
+                self.timers = {p.name: 0 for p in self.players}
+                self.time = True
 
         self.data = {"new_game": False}
+        self.over = False
+        self.counter = 0
+        self.winner = None
+        self.init_records()
 
         def over():
-            self.info.is_over = True
+            self.over = True
 
         def restart():
-            self.time = time.time()
             self.info.window.fill(Colors.gray)
             self.order = 0
             self.info.game_matrix = self.info.init_matrix(self.info.field)
+            self.info.is_over = False
+            if self.time:
+                self.timers = {p.name: 0 for p in self.players}
+
+        def records():
+            rw = RecordWindow()
+            rw.run()
+            self.info.window = pygame.display.set_mode(self.info.res)
 
         def new_game():
-            self.time = time.time()
             self.data["new_game"] = True
             over()
 
@@ -48,7 +67,7 @@ class Game:
             result = save(self, 'saves/' + name + '.txt')
             while result is not None:
                 pygame.display.set_caption(result)
-                #time.sleep(1)
+                # time.sleep(1)
                 name = self.handle_events_enter_text(name)
                 result = save(self, 'saves/' + name + '.txt')
             pygame.display.set_caption(name + ' was saved')
@@ -56,7 +75,7 @@ class Game:
         self.buttons = {
             'New Game': Button((10, 10), (20, 20), new_game, Images.home),
             'Restart': Button((40, 10), (20, 20), restart, Images.restart),
-            'Record table': Button((70, 10), (20, 20), lambda: None, Images.record),
+            'Record table': Button((70, 10), (20, 20), records, Images.record),
             'Save': Button((100, 10), (20, 20), save_game, Images.save)
         }
 
@@ -77,19 +96,60 @@ class Game:
     '''main loop'''
 
     def run(self):
-        self.time = time.time()
         self.draw()
-        while not self.info.is_over:
-            if type(self.players[self.order]) is PlayerBot:
-                #time.sleep(0.7)
+        while not self.over:
+            if type(self.players[self.order]) is PlayerBot and not self.info.is_over:
+                # time.sleep(0.7)
                 self.make_move()
+                self.draw()
             else:
+                start = time.perf_counter()
                 self.handle_events()
+                self.draw()
+                if self.time:
+                    move_time = time.perf_counter() - start
+                    if not self.info.is_over and self.time:
+                        self.timers[self.players[self.order].name] += move_time
 
             self.draw()
 
-    def start(self):
-        pass
+    def init_records(self):
+        for player in self.players:
+            if not os.path.exists('records/players/{0}.txt'.format(player.name)):
+                with open('records/players/{0}.txt'.format(player.name), 'w') as f:
+                    empty_stats = {
+                        "Won": 0,
+                        "Lose": 0,
+                        "Total": 0,
+                        "red": 0,
+                        "blue": 0,
+                        "green": 0,
+                        "marine": 0,
+                        "orange": 0,
+                        "pink": 0,
+                        "purple": 0,
+                        "yellow": 0,
+                        "Best time": 1000000000
+                    }
+
+                    json.dump(empty_stats, f)
+
+    def update_records(self):
+        if self.info.is_over:
+            for player in self.players:
+                player_stats = {}
+                with open('records/players/{0}.txt'.format(player.name), 'r') as f:
+                    player_stats = json.load(f)
+                    if player.name == self.winner.name:
+                        player_stats['Won'] += 1
+                    else:
+                        player_stats['Lose'] += 1
+                    player_stats['Total'] += 1
+                    player_stats[player.color[0]] += 1
+                    if self.time and player_stats['Best time'] > int(self.timers[player.name]) and player is PlayerMan:
+                        player_stats['Best time'] = int(self.timers[player.name])
+                with open('records/players/{0}.txt'.format(player.name), 'w+') as f:
+                    json.dump(player_stats, f)
 
     def draw(self):
         window = self.info.window
@@ -119,17 +179,23 @@ class Game:
 
         pygame.font.init()
         font = pygame.font.SysFont('Arial', 16)
-        window.blit(font.render("It's     's turn", True, Colors.black), (490, 10))
-        window.blit(self.players[self.order].color[1][0], (513, 12))
+        if not self.info.is_over:
+            window.blit(font.render("It's     's turn", True, Colors.black), (490, 10))
+            window.blit(self.players[self.order].color[1][0], (513, 12))
+        else:
+            window.blit(font.render("{0} won".format(self.winner.name), True, Colors.black), (490, 10))
+            window.blit(self.winner.color[1][0], (513, 12))
 
         font = pygame.font.SysFont('Arialblack', 16)
         x = self.info.res[0] - 200
         y = 30
         for player in self.players:
-            window.blit(font.render('{0}: {1}'.format(player.name, player.points), True, self.colors[player.color[0]]), (x, y))
+            window.blit(font.render('{0}: {1}'.format(player.name, player.points), True, self.colors[player.color[0]]),
+                        (x, y))
+            if self.time:
+                window.blit(font.render("%.2f" % self.timers[player.name], True, Colors.black), (x - 40, y))
             y += 40
 
-        window.blit(font.render((time.time() - self.time).__str__()[:4], True, Colors.black), (self.info.res[0] - 200, 400))
         pygame.display.update()
 
     def click_action(self, m_pos):
@@ -145,24 +211,32 @@ class Game:
         return pos
 
     def make_move(self):
+        if self.info.is_over:
+            return
         p = self.players[self.order]
         d = p.make_move(self.info.game_matrix)
         dot = self.info.game_matrix[d[0]][d[1]]
         if dot.color == 'gray':
             self.info.game_matrix[d[0]][d[1]].change_color(p.color)
-            if self.order + 1 == len(self.players):
-                self.order = 0
-            else:
-                self.order += 1
             disabled, active = Referee.check_surrounded(self.info.game_matrix, p.color[0])
             p.points = len(disabled)
             for pos in disabled:
                 self.info.game_matrix[pos[0]][pos[1]].active = False
+            self.counter += 1
+            if self.counter == len(self.info.game_matrix) * len(self.info.game_matrix[0]):
+                self.winner = sorted(self.players, key=lambda p: p.points, reverse=True)[0]
+                self.info.is_over = True
+                self.update_records()
+
+            if self.order + 1 == len(self.players):
+                self.order = 0
+            else:
+                self.order += 1
 
     def handle_events(self):
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
-                self.info.is_over = True
+                self.over = True
             elif e.type == pygame.MOUSEBUTTONDOWN:
                 index = self.click_action(e.pos)
                 if index == (-1, -1):
@@ -187,7 +261,7 @@ class Game:
         while not is_over:
             for e in pygame.event.get():
                 if e.type == pygame.QUIT:
-                    self.info.is_over = True
+                    self.over = True
                     return
                 elif e.type == pygame.MOUSEBUTTONDOWN:
                     if self.buttons['Save'].is_pressed(e.pos):

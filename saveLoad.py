@@ -23,7 +23,8 @@ def save(game, name):
         'matrix': format_matrix(game.info.game_matrix),
         'order': game.order,
         'players': format_players_to_data(game.players),
-        'time': game.time
+        'time': game.time,
+        'timers': game.timers
     }
 
     for file_name in os.listdir('saves'):

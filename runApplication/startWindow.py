@@ -10,7 +10,7 @@ from dots.colors import Colors
 
 class StartWindow:
 
-    def __init__(self, res):
+    def __init__(self):
         self.available_images = {
             'green': Images.green,
             'orange': Images.orange,
@@ -19,22 +19,26 @@ class StartWindow:
             'purple': Images.purple,
             'marine': Images.marine
         }
-        self.men_images = {'red': Images.red, 'blue': Images.blue}
-        self.ai_images = {}
+        self.men_images = {'green': Images.green}
+        self.ai_images = {'red': Images.red, 'blue': Images.blue, }
         self.men_players = {}
         self.ai_players = {}
         self.is_over = False
         self.data = {
+            "men_players": self.men_players,
+            "ai_players": self.ai_players,
             "men_images": self.men_images,
             "ai_images": self.ai_images,
-            "resolution_set": (1080, 720),
-            "n_x": 32,
-            "n_y": 32,
-            "men": 2,
-            "ai": 0,
-            "close": False
+            "resolution_set": (1000, 600),
+            "n_x": 4,
+            "n_y": 4,
+            "men": 1,
+            "ai": 2,
+            "close": False,
+            'time': False
         }
         self.game_state = None
+        self.window = pygame.display.set_mode(self.data['resolution_set'])
 
         def over():
             if self.data['men'] + self.data['ai'] > 1:
@@ -116,6 +120,22 @@ class StartWindow:
             else:
                 self.data['n_y'] = 2
 
+        def create_timer_button():
+            b = Button((400, 250), (200, 65), caption='Timer off')
+
+            def on_click():
+                if b.caption == 'Timer off':
+                    b.caption = 'Timer on'
+                    b.image = Images.empty_pressed
+                    self.data['time'] = True
+                elif b.caption == 'Timer on':
+                    b.caption = 'Timer off'
+                    b.image = Images.empty
+                    self.data['time'] = False
+
+            b.on_click = on_click
+            return b
+
         self.buttons = {
             "Bot_Players": Button((10, 10), (150, 150), image=Images.ai),
             "Up1": Button((180, 10), (65, 65), ai_plus, image=Images.up),
@@ -124,6 +144,8 @@ class StartWindow:
             "Man_Players": Button((400, 10), (150, 150), image=Images.man),
             "Up2": Button((570, 10), (65, 65), men_plus, image=Images.up),
             "Down2": Button((570, 95), (65, 65), men_minus, image=Images.down),
+
+            "Timer": create_timer_button(),
 
             "n_Y": Button((10, 440), (150, 150), image=Images.ny),
             "Up3": Button((180, 440), (65, 65), y_plus, image=Images.up),
@@ -137,12 +159,16 @@ class StartWindow:
             "OK": Button((800, 440), (150, 150), on_click=set_names, image=Images.ok)
         }
 
-        self.window = pygame.display.set_mode(res)
+    def init_window(self):
+        self.window = pygame.display.set_mode(self.data['resolution_set'])
         self.window.fill((192, 192, 192))
         pygame.display.set_caption('Main menu')
         pygame.init()
 
     def run(self):
+        self.init_window()
+        self.is_over = False
+        self.data['close'] = False
         self.draw()
         while not self.is_over:
             self.draw()
@@ -152,7 +178,7 @@ class StartWindow:
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 self.is_over = True
-                self.data["close"] = True
+                # self.data["close"] = True
             elif e.type == pygame.MOUSEBUTTONDOWN:
                 self.handle_events_buttons(e.pos)
 
@@ -176,9 +202,13 @@ class StartWindow:
             self.window.blit(self.men_images[key][0], (x, y))
             x += 20
 
-        for b in [x[1] for x in self.buttons.items()]:
-            if b.image is not None:
-                self.window.blit(b.image, b.cords)
+        for k, v in self.buttons.items():
+            if v.image is not None:
+                self.window.blit(v.image, v.cords)
+            pygame.font.init()
+            size = min(max(10, 40 - 4 * (len(v.caption) - 10)), 40)
+            font = pygame.font.SysFont('Arial', size)
+            self.window.blit(font.render(v.caption, True, Colors.gray), (v.cords[0] + 15, v.cords[1] + 10))
 
         pygame.font.init()
         font = pygame.font.SysFont('Arial', 100)

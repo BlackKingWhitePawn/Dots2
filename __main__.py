@@ -1,10 +1,10 @@
-from game.game import Game
+from game import Game
 from runApplication.startWindow import StartWindow
 
 if __name__ == '__main__':
     check = True
+    sw = StartWindow()
     while check:
-        sw = StartWindow((1000, 600))
         sw.run()
         if sw.data["close"]:
             break

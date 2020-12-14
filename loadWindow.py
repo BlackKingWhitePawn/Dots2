@@ -72,7 +72,7 @@ class LoadWindow:
         })
         self.window = pygame.display.set_mode((300, height))
         self.window.fill(Colors.gray)
-        pygame.display.set_caption('Load game')
+        pygame.display.set_caption('Load gameTools')
         pygame.init()
 
     def run(self):
