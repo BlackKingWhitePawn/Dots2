@@ -1,0 +1,1 @@
+{"Won": 0, "Lose": 1, "Total": 1, "red": 0, "blue": 0, "green": 0, "marine": 0, "orange": 0, "pink": 0, "purple": 0, "yellow": 1, "Best time": 1000000000}

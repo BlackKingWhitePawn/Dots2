@@ -6,10 +6,10 @@ import time
 
 from gameTools.referee import Referee
 from player.playerMan import PlayerMan
+from images import Images
 from saveLoad import save
 from gameTools.gameInfo import GameInfo
 from player.playerBot import PlayerBot
-from images import Images
 from controls.button import Button
 from dots.colors import Colors
 from recordsWindow import RecordWindow

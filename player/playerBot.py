@@ -4,7 +4,7 @@ from random import randint
 
 class PlayerBot(Player):
 
-    def __init__(self, color, name="default", ai_level=0):
+    def __init__(self, color, name="default", ai_level=1):
         self.color = color
         self.name = name
         self.points = 0
@@ -13,6 +13,19 @@ class PlayerBot(Player):
 
     def make_move(self, game_matrix):
         if self.level == 0:
+            return randint(0, len(game_matrix) - 1), randint(0, len(game_matrix[0]) - 1)
+        else:
+            for x in range(0, len(game_matrix) - 1):
+                for y in range(0, len(game_matrix[0]) - 1):
+                    dot = game_matrix[x][y]
+                    if dot.color == 'gray' or dot.color == self.color[0]:
+                        continue
+                    for i in range(-1, 2):
+                        for j in range(-1, 2):
+                            if game_matrix[x+i][y+j].color != 'gray':
+                                continue
+                            return x + i, y + j
+
             return randint(0, len(game_matrix) - 1), randint(0, len(game_matrix[0]) - 1)
 
     def get_chain(self, dot_coords):
